@@ -13,7 +13,8 @@
     "db:generate": "npm --prefix backend run db:generate",
     "db:migrate": "npm --prefix backend run db:migrate",
     "db:deploy": "npm --prefix backend run db:deploy",
-    "db:push": "npm --prefix backend run db:push"
+    "db:push": "npm --prefix backend run db:push",
+    "db:push:sqlite": "npm --prefix backend run db:push:sqlite"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
