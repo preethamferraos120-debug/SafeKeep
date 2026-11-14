@@ -1,4 +1,4 @@
-import express from 'express'; import helmet from 'helmet'; import cors from 'cors'; import rateLimit from 'express-rate-limit'; import multer from 'multer'; import path from 'node:path'; import { fileURLToPath } from 'node:url'; import crypto from 'node:crypto'; import fs from 'node:fs/promises'; import { PrismaClient } from '../generated/prisma/index.js';
+import express from 'express'; import helmet from 'helmet'; import cors from 'cors'; import rateLimit from 'express-rate-limit'; import multer from 'multer'; import path from 'node:path'; import { fileURLToPath } from 'node:url'; import crypto from 'node:crypto'; import fs from 'node:fs/promises'; import { PrismaClient } from './database.js';
 import { config } from './config.js'; import { hashPassword,checkPassword,issueToken,verifyToken } from './auth.js'; import { openStream,publish } from './notify.js';
 export const prisma=new PrismaClient(); export const app=express();
 const root=path.resolve(config.UPLOAD_DIR); await fs.mkdir(root,{recursive:true});
