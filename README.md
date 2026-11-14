@@ -1,6 +1,6 @@
 # SafeKeep — Personal Document Vault
 
-SafeKeep is a full-stack starter for a private personal document vault. It includes a React interface, Express API, PostgreSQL/Prisma data model, in-memory access-token authentication, per-user authorization, private local uploads, notifications, and authenticated SSE.
+SafeKeep is a full-stack starter for a private personal document vault. It includes a React interface, Express API, SQLite for local development and PostgreSQL/Prisma data model, in-memory access-token authentication, per-user authorization, private local uploads, notifications, and authenticated SSE.
 
 ## Features
 
@@ -16,7 +16,7 @@ SafeKeep is a full-stack starter for a private personal document vault. It inclu
 
 - `frontend/`: React 18, Vite, React Router, Axios, Lucide.
 - `backend/`: Express API, authentication, authorization, upload handling, and notifications.
-- `database/`: Prisma schema and migration history for PostgreSQL.
+- `database/`: Prisma schemas for local SQLite and production PostgreSQL, plus PostgreSQL migration history.
 
 The backend is explicitly built with Express (`backend/src/server.js` starts the Express app). The folders are separate at the project root so frontend code, server code, and database schema/migrations are easy to locate.
 
@@ -33,7 +33,7 @@ Render's local filesystem is temporary unless you attach a persistent disk. Uplo
 
 ## Prerequisites and setup
 
-Use Node.js 20+ and PostgreSQL 14+. From this directory:
+Use Node.js 20+. PostgreSQL 14+ is only needed if you want to use PostgreSQL locally; the default local setup uses SQLite. From this directory:
 
 ```sh
 npm install
@@ -41,14 +41,16 @@ npm --prefix backend install
 npm --prefix frontend install
 ```
 
-Create `backend/.env` from `backend/.env.example`. Set `DATABASE_URL` to a PostgreSQL connection string and generate a random `JWT_ACCESS_SECRET` with at least 32 characters. Adjust `CLIENT_URL`, `UPLOAD_DIR`, and `MAX_FILE_SIZE_MB` as needed. The API validates required configuration at startup.
+Create `backend/.env` from `backend/.env.example`. Keep its SQLite `DATABASE_URL=file:./dev.db` for local development, and replace `JWT_ACCESS_SECRET` with a random secret of at least 32 characters. Adjust `CLIENT_URL`, `UPLOAD_DIR`, and `MAX_FILE_SIZE_MB` as needed. The API selects SQLite for `file:` URLs and PostgreSQL for PostgreSQL URLs.
 
-Generate Prisma and apply the database migrations from the `database/` schema:
+Generate both Prisma clients and create/update the local SQLite database:
 
 ```sh
 npm run db:generate
-npm run db:deploy
+npm run db:push:sqlite
 ```
+
+For a local PostgreSQL database, set `DATABASE_URL` to PostgreSQL and use `npm run db:deploy` instead. Render continues to use PostgreSQL migrations.
 
 Run both development servers:
 
@@ -98,7 +100,7 @@ Run `npm test`. Backend test files use Node's test runner; frontend uses Vitest.
 ## Troubleshooting
 
 - **Config validation fails:** copy `backend/.env.example` to `backend/.env`, replace the database URL, and set a JWT secret of 32+ characters.
-- **Database connection errors:** start PostgreSQL, create the `safekeep` database, then rerun `npm run db:migrate`.
+- **Local database errors:** confirm `backend/.env` has `DATABASE_URL="file:./dev.db"`, then run `npm run db:generate` and `npm run db:push:sqlite`. For PostgreSQL, start the database and run `npm run db:migrate`.
 - **CORS errors:** make `CLIENT_URL` exactly match the browser origin.
 - **Upload rejected:** use PDF, JPEG, PNG, DOCX, or XLSX under the configured size limit.
 - **Session ends after refresh:** access tokens are intentionally memory-only; sign in again (refresh flow is an explicit follow-up).
