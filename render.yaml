@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: SafeKeep
+    runtime: node
+    plan: free
+    region: virginia
+    branch: main
+    buildCommand: npm install && npm --prefix backend install && npm --prefix frontend install && npm run db:generate && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: safekeep-postgres
+          property: connectionString
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: CLIENT_URL
+        value: https://safekeep-u2jr.onrender.com
+databases:
+  - name: safekeep-postgres
+    plan: free
+    region: virginia
+    postgresMajorVersion: '18'
