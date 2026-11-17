@@ -18,6 +18,7 @@ model User {
   updatedAt     DateTime       @updatedAt
   documents     Document[]
   notifications Notification[]
+  notes         Note[]
 }
 
 model Document {
@@ -37,6 +38,18 @@ model Document {
 
   @@index([ownerId, createdAt])
   @@index([ownerId, category])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  content   String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, createdAt])
 }
 
 model Notification {
