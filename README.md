@@ -8,7 +8,7 @@ SafeKeep is a full-stack starter for a private personal document vault. It inclu
 - Access tokens remain in JavaScript memory; no browser storage is used for credentials.
 - Private upload directory, randomized storage keys, upload size/type limits, and basic file-signature checks.
 - Owner-scoped document list, detail, download, and delete endpoints.
-- Private, user-scoped notes with authenticated list, create, update, and delete API endpoints.
+- Private user notes with authenticated CRUD endpoints, plus a public feed containing only notes explicitly published by their owner.
 - Search, category filtering, sorting, pagination, and multi-file upload UI.
 - Persisted notifications, unread counts, read actions, and per-user SSE streams.
 - Responsive dashboard, document list, upload, profile settings, empty/loading states, and accessible toast feedback.
@@ -73,7 +73,9 @@ All API routes are under `/api`.
 | POST | `/auth/logout` | End client session |
 | GET | `/auth/me` | Restore/check current in-memory session |
 | GET/PATCH | `/profile` | Read/update profile name |
-| GET/POST | `/notes` | List the signed-in user's notes or create a note |
+| GET | `/notes` | Publicly list notes whose owners opted to publish them |
+| GET | `/notes/mine` | List the signed-in user's private and public notes |
+| POST | `/notes` | Create a signed-in user's note; set `isPublic: true` to publish it |
 | PATCH/DELETE | `/notes/:id` | Update or delete one of the signed-in user's notes |
 | POST | `/documents/upload` | Upload one multipart `file` (plus optional category/title) |
 | GET | `/documents?page=1&limit=12&search=&category=&sort=newest` | List owner documents |
@@ -92,7 +94,7 @@ Errors use `{ "error": { "code": "...", "message": "..." } }`. Authenticated end
 
 Passwords are hashed with bcrypt. Access JWTs are signed with a configured secret and short expiry (default 15 minutes). The React client keeps the token in memory only; reloading the page ends that session and requires signing in again. This project intentionally does not implement refresh cookies or silent refresh. The notification panel uses a fetch-based SSE stream with bearer authorization and exponential reconnect delay, avoiding tokens in URLs.
 
-Document and note ownership is derived from the verified token, never a client-supplied owner id. Private files are stored outside the client public directory under randomized keys and are only streamed through an authenticated route. The server checks a short signature prefix for supported formats, with Office files checked as ZIP containers. Do not serve `UPLOAD_DIR` statically. Set restrictive filesystem permissions and back up the database and files together.
+Document and private-note ownership is derived from the verified token, never a client-supplied owner id. Only notes whose owner explicitly sets `isPublic: true` appear in the unauthenticated public notes feed. Private files are stored outside the client public directory under randomized keys and are only streamed through an authenticated route. The server checks a short signature prefix for supported formats, with Office files checked as ZIP containers. Do not serve `UPLOAD_DIR` statically. Set restrictive filesystem permissions and back up the database and files together.
 
 This starter is not a claim of production security. Before deployment, perform a security review; configure TLS, secure infrastructure and backups, malware scanning/content disarm for uploads, robust file-format parsing, observability, and operational limits. Refresh-token rotation, CSRF, account recovery, email verification, document preview, and object-storage adapter are not implemented. No secrets should be committed.
 
